@@ -6,7 +6,6 @@ Syntax::Syntax(int dados[], int tamanho){
    total = tamanho;
 }
 
-
 bool Syntax::Parser(){
     int token_da_vez;
     int count_conditions = 0;
@@ -17,7 +16,7 @@ bool Syntax::Parser(){
     for(int i = 0 ; i < total ; i++){
         token_da_vez = tokens[i];
 
-        Serial.print("[PARSER] Token da vez: ");
+        //Serial.print("[PARSER] Token da vez: ");
         // Serial.println(token_da_vez);
 
         switch (token_da_vez) {
@@ -27,7 +26,7 @@ bool Syntax::Parser(){
                 count_conditions++;
                 count_blocks++;
 
-                Serial.print("[PARSER] Somei condição e bloco");
+                //Serial.print("[PARSER] Somei condição e bloco");
                 // Serial.println(count_conditions);
                 // Serial.println(count_blocks);
 
@@ -36,7 +35,7 @@ bool Syntax::Parser(){
             case _ESPERA:
                 count_functions++;
 
-                Serial.print("[PARSER] Somei função");
+                //Serial.print("[PARSER] Somei função");
                 // Serial.println(count_functions);
 
                 break;
@@ -44,7 +43,7 @@ bool Syntax::Parser(){
             case _ENDBLOCK:
                 count_blocks--;
 
-                Serial.print("[PARSER] Tirei blocos");
+                //Serial.print("[PARSER] Tirei blocos");
                 // Serial.println(count_blocks);
 
                 break;
@@ -52,7 +51,7 @@ bool Syntax::Parser(){
             case _ENDFUNCTION:
                 count_functions--;
 
-                Serial.print("[PARSER] Tirei funções");
+                //Serial.print("[PARSER] Tirei funções");
                 // Serial.println(count_functions);
 
                 break;
@@ -60,7 +59,7 @@ bool Syntax::Parser(){
             case _ENDCOND:
                 count_conditions--;
 
-                Serial.print("[PARSER] Tirei condições");
+                //Serial.print("[PARSER] Tirei condições");
                 // Serial.println(count_conditions);
 
                 break;
@@ -118,5 +117,26 @@ bool Syntax::Parser(){
 }
 
 bool Syntax::LookAhead(){
-    // Serial.println("Temporary");
-    }   
+    // tokens
+    // total
+    int token_da_vez;
+    int contador = 0;
+    int proximo = 0;
+
+    for (int i = 0; i < total; i++) {
+        
+        token_da_vez = tokens[i];
+
+        if (i + 1 < total){
+            proximo = tokens[i + 1];
+        }else{
+            proximo = _END;
+        }
+
+        Serial.print("[LOOKAHEAD] Atual/Prox: ");
+        Serial.print(token_da_vez);
+        Serial.print(" / ");
+        Serial.println(proximo);
+    }
+
+}   

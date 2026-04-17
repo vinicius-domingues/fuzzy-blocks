@@ -1,7 +1,6 @@
 #ifndef TOKENS_H
 #define TOKENS_H
 
-
 #define _END -1
 
 // Fluxo inicial
@@ -57,3 +56,43 @@
 #define FINALIZANDO 4
 
 #endif
+
+inline bool isMetodo(int t) {
+    return (t >= _FREIA && t <= _AZUL); 
+}
+
+inline bool isValor(int t) {
+    return (t >= _ZERO && t <= _FALSE); 
+}
+
+inline bool isOperacao(int t) {
+    return (t >= _EQUAL && t <= _SMALLER); 
+}
+
+inline bool isCondicao(int t) {
+    return (t == _IF || t == _WHILE); 
+}
+
+inline bool isFunction(int t) {
+    return (t >= _ESPERA && t <= _ESPERA); 
+}
+
+inline bool isVar(int t) {
+    return (t >= _SEGUNDOS && t <= _SEGUNDOS); 
+}
+
+inline bool isEndCond(int t) {
+    return (t >= _ENDCOND && t <= _ENDCOND); 
+}
+
+inline bool isEndBlock(int t) {
+    return (t >= _ENDBLOCK && t <= _ENDBLOCK); 
+}
+
+inline bool isEndFunction(int t) {
+    return (t >= _ENDFUNCTION && t <= _ENDFUNCTION); 
+}
+
+inline bool isLogical(int t){
+    return (t >= _AND || t <= _OR); 
+}

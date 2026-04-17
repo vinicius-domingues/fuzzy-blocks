@@ -91,14 +91,11 @@ class Controller{
 
           i++;
 
-          delay(1000);
+          delay(500);
           Serial.print("Token: ");
           Serial.println(token); 
         }
-
-       
       }
-
     }
 };
 
@@ -106,18 +103,23 @@ class Controller{
 void setup() {
   Controller* arduino;
   Syntax* analisador;
+  bool error_flag = false;
 
   arduino = new Controller ();
 
   Serial.begin(9600);
   delay(1000);
 
+  // Escuta os pulsos elétricos
   arduino->Listener();
 
+  // Cria o objeto analisador, e passa o array lido e o tanto de blocos lidos (que pode ser diferente do limite total de 50)
   analisador = new Syntax (arduino->sequence, arduino->blocks_read);
 
-  analisador->Parser();
-
+  // Se passar pelo Parser, chama o LookAhead;
+  if(!analisador->Parser()){
+    error_flag = analisador->LookAhead();
+  }
 }
 
 void loop() {}

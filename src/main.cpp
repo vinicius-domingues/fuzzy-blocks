@@ -1,88 +1,123 @@
 #include <Arduino.h>
-#include "Controller.h"
+#include <syntax.h>
+#include <tokens.h>
 
-# define _TEST 1
-# define PIN_CS_SD 4
+/*
+#define _ENDCOND 4
+#define _ENDBLOCK 5
+#define _ENDFUNCTION 6
+*/
+int entry_tokens[] = {1, 104, 200, 302, 6, 105, 200, 302, 6, 106, 200, 302, 6, 1};
+// 1 = INICIO
+// 104 = ACENDE VERMELHO
+// 200 = ESPERA
+// 302 = 5
+// 6 = FECHA FUNCAO
+// 105 = ACENDE VERDE
+// 200 = ESPERA
+// 302 = 5
+// 6 = FECHA FUNCAO
+// 106 = ACENDE AZUL
+// 200 = ESPERA
+// 302 = 5
+// 6 = FECHA FUNCAO
+// 1 = INICIO
 
-Controller arduino; // from "Controller.h
-bool sd = false;
+class Controller{
+  public:
+    static const int blocks_limit = 50;
+    int sequence[blocks_limit];
+    bool got_error = false;
+    int blocks_read = 0;
+
+    void Listener(){  
+      int i = 0;
+      bool waiting = true;    // Esperando encontrar valor para iniciar a escuta
+      bool listening = false; // Escuta até encontrar FIM, INÍCIO ou estourar limite
+      int token;
+    
+      while(waiting){
+        //token recebe valor
+        token = entry_tokens[i];
+
+        if(token == _START){ // Se lê INICIO, passa a escutar e para de esperar
+          listening = true;
+          waiting = false;
+        }
+
+        delay(500);
+        //Serial.print("Token: ");
+        //Serial.println(token);
+
+        i++; // Quando vier do pin, vai mudar, nao vai precisar desse cara
+      }
+     
+
+      bool is_condition = false;
+      bool is_function = false;
+      while(listening){
+        token = entry_tokens[i];   // Pulou o início, agora só valores validos
+        
+        if(token == _START || token == _END || blocks_read == blocks_limit || got_error){
+          listening = false;
+        }else{
+          
+          if(token == _IF || token == _WHILE){
+            is_condition = true;
+          } else if (token == _ESPERA){
+            is_function = true;
+          }
+
+          sequence[blocks_read] = token;
+          blocks_read++;
+
+          // Se for fim da linha e não for condição e função ao mesmo tempo (pois indicaria erro de blocos)
+          /* if ( fim da linha || !(is_condition && is_function )){
+              if ( is_condition ) {
+                sequence[blocks_read] = _ENDCOND;
+                is_condition = false;
+                blocks_read++;
+                }
+
+                if (is_function){
+                sequence[blocks_read] = _ENDFUNCTION;
+                is_function = false;
+                blocks_read++;
+               }
+            }else{
+              got_error = true;
+            }
+          */
+
+          i++;
+
+          delay(1000);
+          Serial.print("Token: ");
+          Serial.println(token); 
+        }
+
+       
+      }
+
+    }
+};
+
 
 void setup() {
-  
+  Controller* arduino;
+  Syntax* analisador;
+
+  arduino = new Controller ();
+
   Serial.begin(9600);
   delay(1000);
-  randomSeed(analogRead(LOW));
 
-  if (!SD.begin(PIN_CS_SD)) {
-    Serial.println(F("[WARNING] SD não encontrado"));
-  } else {
-    Serial.println(F("[LOG] SD montado com sucesso."));
-    sd = true;
-  }
+  arduino->Listener();
 
-  // Se teste unitário
-  #if _TEST
-    #include "test.h"  
-    test_execute();
-    while(true){}
-  #endif
+  analisador = new Syntax (arduino->sequence, arduino->blocks_read);
 
-  bool stop = false;
-  int limite = 50;
-  int token_queue[limite];
-  int token_sequence = 0;
-  int token;
+  analisador->Parser();
 
-  // Compilação
-  while(!stop){
-    // Escutando eventos
-    while(arduino.estado==ESCUTANDO){
-        token = random(0, 2);
-        Serial.print("[ESTADO 0] Token recebido: "); 
-        Serial.println(token);
-
-        if (token == 1){
-          Serial.println("Entrei no start");
-          arduino.estado=MAPEANDO;
-        }
-        delay(1000);
-      }
-
-    // Mapeamento
-    while (arduino.estado==MAPEANDO && token_sequence <= limite){
-      Serial.println("[LOG] Mapeando");
-      token = random(-1, 12);
-      //Serial.print("[ESTADO 1] Token recebido: "); 
-      //Serial.println(token);
-
-      //Serial.println("[ACUMULADOR] ----------------");
-      token_queue[token_sequence] = token;
-      token_sequence++;
-      if (token == _END || token_sequence == limite){
-        //Serial.println("[END] ----------------");
-        arduino.estado=TRANSPILANDO;
-      }
-    }
-    
-    // Transpilando
-    while (arduino.estado == TRANSPILANDO){
-      Serial.println("[LOG] Transpilando");
-      arduino.TranspilaCodigo(token_queue, limite, token_sequence);
-      arduino.estado = EXECUTANDO;
-    }
-      
-    // Executando
-    while (arduino.estado == EXECUTANDO){
-      Serial.println("[LOG] Executando");  
-      arduino.estado = FINALIZANDO;
-    }
-
-    // Encerrando
-    if (arduino.estado == FINALIZANDO){
-      Serial.println("[LOG] Finalizando");  
-      stop = true;
-    }
-  }
 }
 
 void loop() {}

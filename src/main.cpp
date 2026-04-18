@@ -92,10 +92,20 @@ class Controller{
           i++;
 
           delay(500);
-          Serial.print("Token: ");
-          Serial.println(token); 
+          if(blocks_read == 1){
+            Serial.println("");
+            Serial.print("[LISTENER] Tokens: ");
+            Serial.print(token); 
+          }else{
+            Serial.print(" - "); 
+            Serial.print(token); 
+          }
+
         }
+        
       }
+
+    Serial.println(""); 
     }
 };
 

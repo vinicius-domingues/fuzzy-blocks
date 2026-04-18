@@ -1,5 +1,5 @@
-#include <syntax.h>
-#include <tokens.h>
+#include "syntax.h"
+#include "tokens.h"
 
 Syntax::Syntax(int dados[], int tamanho){
    tokens = dados; 
@@ -69,10 +69,10 @@ bool Syntax::Parser(){
     if (count_conditions != 0){
         if(count_conditions < 0) {
             result = 1; // Erro: Há mais fechamentos condicionais que condições
-            // Serial.println("[PARSER] Erro: Há mais fechamentos condicionais que condições");
+            Serial.println("[PARSER] Erro: Há mais fechamentos condicionais que condições");
         }else{
             result = 2; // Erro: Faltam fechamentos condicionais
-            // Serial.println("[PARSER] Erro: Faltam fechamentos condicionais");
+            Serial.println("[PARSER] Erro: Faltam fechamentos condicionais");
         }
         error_flag = true;
     }
@@ -81,10 +81,10 @@ bool Syntax::Parser(){
         if (count_blocks != 0){
             if(count_blocks < 0) {
                 result = 3; // Erro: Há mais fechamentos de bloco que condições
-                // Serial.println("[PARSER] Erro: Há mais fechamentos de bloco que condições");
+                Serial.println("[PARSER] Erro: Há mais fechamentos de bloco que condições");
             }else{
                 result = 4; // Erro: Faltam fechamentos de bloco
-                // Serial.println("[PARSER] Erro: Faltam fechamentos de bloco");
+                Serial.println("[PARSER] Erro: Faltam fechamentos de bloco");
             }
 
             error_flag = true;
@@ -95,10 +95,10 @@ bool Syntax::Parser(){
         if (count_functions != 0){
             if(count_functions < 0) {
                 result = 5; // Erro: Há mais fechamentos de função que funções
-                // Serial.println("[PARSER] Erro: Há mais fechamentos de função que funções");
+                Serial.println("[PARSER] Erro: Há mais fechamentos de função que funções");
             }else{
                 result = 6; // Erro: Faltam fechamentos de função
-                // Serial.println("[PARSER] Erro: Faltam fechamentos de função");
+                Serial.println("[PARSER] Erro: Faltam fechamentos de função");
             }
 
             error_flag = true;
@@ -164,9 +164,9 @@ bool Syntax::LookAhead(){
 
         // Token MÉTODO (4/11)
         else if(isMetodo(token_da_vez)){
-            if(isVar(proximo) || isValor(proximo)){ 
+            if(isVar(proximo) || isValor(proximo) || isCondicao(proximo)){ 
                 result = 11;
-                Serial.println("[LOOKAHEAD] Erro 11: Metodo nao pode ser seguido por Variavel ou Valor");
+                Serial.println("[LOOKAHEAD] Erro 11: Metodo nao pode ser seguido por MÉTODO, VARIÁVEL ou VALOR");
                 error_flag = true;
             }
         }
@@ -234,17 +234,16 @@ bool Syntax::LookAhead(){
             }
         }
 
-
-
-        
+        if(error_flag){
+            Serial.print("[LOOKAHEAD] Atual/Prox: ");
+            Serial.print(token_da_vez);
+            Serial.print(" / ");
+            Serial.println(proximo);
+            break;
+        }
     }
 
-    if(error_flag){
-        Serial.print("[LOOKAHEAD] Atual/Prox: ");
-        Serial.print(token_da_vez);
-        Serial.print(" / ");
-        Serial.println(proximo);
-    }else{
+    if(!error_flag){
         Serial.print("[LOOKAHEAD] Sucesso: ");
         Serial.println(result);
     }

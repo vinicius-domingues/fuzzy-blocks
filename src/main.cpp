@@ -3,14 +3,12 @@
 #include "tokens.h"
 #include "controller.h"
 
-
-
 void setup() {
     Controller* arduino;
     Syntax* analisador;
     bool error_flag = false;
 
-    arduino = new Controller ();
+    arduino = new Controller();
 
     Serial.begin(9600);
 
@@ -22,7 +20,10 @@ void setup() {
 
     // Se passar pelo Parser, chama o LookAhead;
     if(!analisador->Parser()){
-      error_flag = analisador->LookAhead();
+      // Se passar pelo LookAehad, chama o semantic
+      if(!analisador->LookAhead()){
+        error_flag = analisador->Semantic();
+      }
     }
   
 }

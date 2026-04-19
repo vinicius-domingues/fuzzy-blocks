@@ -13,80 +13,56 @@ bool Syntax::Parser(){
     int count_functions = 0;
     bool error_flag = false;
 
-    for(int i = 0 ; i < total ; i++){
-        token_da_vez = tokens[i];
+    if(!error_flag){
+        for(int i = 0 ; i < total ; i++){
+            token_da_vez = tokens[i];
 
-        //Serial.print("[PARSER] Token da vez: ");
-        // Serial.println(token_da_vez);
+            switch (token_da_vez) {
+                
+                case _IF:
+                case _WHILE:
+                    count_conditions++;
+                    count_blocks++;
+                    break;
 
-        switch (token_da_vez) {
-            
-            case _IF:
-            case _WHILE:
-                count_conditions++;
-                count_blocks++;
+                case _DELAY:
+                    count_functions++;
+                    break;
 
-                //Serial.print("[PARSER] Somei condição e bloco");
-                // Serial.println(count_conditions);
-                // Serial.println(count_blocks);
+                case _ENDBLOCK:
+                    count_blocks--;
+                    break;
 
-                break;
+                case _ENDFUNCTION:
+                    count_functions--;
+                    break;
 
-            case _ESPERA:
-                count_functions++;
-
-                //Serial.print("[PARSER] Somei função");
-                // Serial.println(count_functions);
-
-                break;
-
-            case _ENDBLOCK:
-                count_blocks--;
-
-                //Serial.print("[PARSER] Tirei blocos");
-                // Serial.println(count_blocks);
-
-                break;
-
-            case _ENDFUNCTION:
-                count_functions--;
-
-                //Serial.print("[PARSER] Tirei funções");
-                // Serial.println(count_functions);
-
-                break;
-
-            case _ENDCOND:
-                count_conditions--;
-
-                //Serial.print("[PARSER] Tirei condições");
-                // Serial.println(count_conditions);
-
-                break;
+                case _ENDCONDITION:
+                    count_conditions--;
+                    break;
+            }
         }
-    }
-
-    if (count_conditions != 0){
-        if(count_conditions < 0) {
-            result = 1; // Erro: Há mais fechamentos condicionais que condições
-            Serial.println("[PARSER] Erro: Há mais fechamentos condicionais que condições");
-        }else{
-            result = 2; // Erro: Faltam fechamentos condicionais
-            Serial.println("[PARSER] Erro: Faltam fechamentos condicionais");
+        if (count_conditions != 0){
+            if(count_conditions < 0) {
+                result = 1;
+                Serial.println(F("[PARSER] Erro: Há mais fechamentos condicionais que condições"));
+            }else{
+                result = 2;
+                Serial.println(F("[PARSER] Erro: Faltam fechamentos condicionais"));
+            }
+            error_flag = true;
         }
-        error_flag = true;
     }
 
     if(!error_flag){
         if (count_blocks != 0){
             if(count_blocks < 0) {
-                result = 3; // Erro: Há mais fechamentos de bloco que condições
-                Serial.println("[PARSER] Erro: Há mais fechamentos de bloco que condições");
+                result = 3;
+                Serial.println(F("[PARSER] Erro: Há mais fechamentos de bloco que condições"));
             }else{
-                result = 4; // Erro: Faltam fechamentos de bloco
-                Serial.println("[PARSER] Erro: Faltam fechamentos de bloco");
+                result = 4;
+                Serial.println(F("[PARSER] Erro: Faltam fechamentos de bloco"));
             }
-
             error_flag = true;
         }
     }
@@ -94,22 +70,21 @@ bool Syntax::Parser(){
     if(!error_flag){
         if (count_functions != 0){
             if(count_functions < 0) {
-                result = 5; // Erro: Há mais fechamentos de função que funções
-                Serial.println("[PARSER] Erro: Há mais fechamentos de função que funções");
+                result = 5;
+                Serial.println(F("[PARSER] Erro: Há mais fechamentos de função que funções"));
             }else{
-                result = 6; // Erro: Faltam fechamentos de função
-                Serial.println("[PARSER] Erro: Faltam fechamentos de função");
+                result = 6;
+                Serial.println(F("[PARSER] Erro: Faltam fechamentos de função"));
             }
-
             error_flag = true;
         }
     } 
 
     if(error_flag){
-        Serial.print("[PARSER] Deu erro: ");
+        Serial.print(F("[PARSER] Falha: "));
         Serial.println(result);
     }else{
-        Serial.print("[PARSER] Sucesso: ");
+        Serial.print(F("[PARSER] Sucesso: "));
         Serial.println(result);
     }
 
@@ -117,7 +92,7 @@ bool Syntax::Parser(){
 }
 
 bool Syntax::LookAhead(){
-    int error_flag = false;
+    bool error_flag = false;
     int token_da_vez;
     int proximo = 0;
 
@@ -135,118 +110,221 @@ bool Syntax::LookAhead(){
         if(token_da_vez == _START){
             if(proximo == _START){
                 result = 7;
-                Serial.println("[LOOKAHEAD] Erro 7: INICIO seguido de INICIO vazio");
+                Serial.println(F("[LOOKAHEAD] Erro 7: INICIO seguido de INICIO vazio"));
                 error_flag = true;
-            }else if(!isCondicao(proximo) && !isMetodo(proximo) && !isFunction(proximo) && proximo != _END){
+            }else if(!isCondition(proximo) && !isMethod(proximo) && !isFunction(proximo) && proximo != _END){
                 result = 8;
-                Serial.println("[LOOKAHEAD] Erro 8: INICIO deve ser seguido por Condicao, Metodo ou Funcao");
+                Serial.println(F("[LOOKAHEAD] Erro 8: INICIO deve ser seguido por Condicao, Metodo ou Funcao"));
                 error_flag = true;
             }
         }
 
         // Token CONDIÇÃO (2/11)
-        else if(isCondicao(token_da_vez)){
-            if(!isMetodo(proximo) && !isVar(proximo) && proximo != _START){
+        else if(isCondition(token_da_vez)){
+            if(!isMethod(proximo) && !isVariable(proximo) && proximo != _START){
                 result = 9;
-                Serial.println("[LOOKAHEAD] Erro 9: Condicao deve ser seguida por Metodo, Variavel ou INICIO");
+                Serial.println(F("[LOOKAHEAD] Erro 9: Condicao deve ser seguida por Metodo, Variavel ou INICIO"));
                 error_flag = true;
             }
         }
         
         // Token OPERADOR (3/11)
-        else if(isOperacao(token_da_vez)){
-            if(!isMetodo(proximo) && !isValor(proximo)){
+        else if(isOperation(token_da_vez)){
+            if(!isMethod(proximo) && !isValue(proximo)){
                 result = 10;
-                Serial.println("[LOOKAHEAD] Erro 10: Operador deve ser seguido por Metodo ou Valor");
+                Serial.println(F("[LOOKAHEAD] Erro 10: Operador deve ser seguido por Metodo ou Valor"));
                 error_flag = true;
             }
         }
 
         // Token MÉTODO (4/11)
-        else if(isMetodo(token_da_vez)){
-            if(isVar(proximo) || isValor(proximo) || isCondicao(proximo)){ 
+        else if(isMethod(token_da_vez)){
+            if(isVariable(proximo) || isValue(proximo) || isCondition(proximo)){ 
                 result = 11;
-                Serial.println("[LOOKAHEAD] Erro 11: Metodo nao pode ser seguido por MÉTODO, VARIÁVEL ou VALOR");
+                Serial.println(F("[LOOKAHEAD] Erro 11: Metodo nao pode ser seguido por MÉTODO, VARIÁVEL ou VALOR"));
                 error_flag = true;
             }
         }
 
         // Token FUNÇÃO (5/11)
         else if(isFunction(token_da_vez)){
-            if(proximo != _START && !isValor(proximo)){
+            if(proximo != _START && !isValue(proximo)){
                 result = 12;
-                Serial.println("[LOOKAHEAD] Erro 12: Funcao deve ser seguida por INICIO ou Valor");
+                Serial.println(F("[LOOKAHEAD] Erro 12: Funcao deve ser seguida por INICIO ou Valor"));
                 error_flag = true;
             }
         }
 
         // Token VALOR (6/11)
-        else if(isValor(token_da_vez)){
-            if(proximo != _START && !isLogical(proximo) && !isEndCond(proximo) && !isEndFunction(proximo)){
+        else if(isValue(token_da_vez)){
+            if(!isLogical(proximo) && !isEndCondition(proximo) && !isEndFunction(proximo)){
                 result = 13;
-                Serial.println("[LOOKAHEAD] Erro 13: Valor deve ser seguido por Logico, INICIO ou Fechamento");
+                Serial.println(F("[LOOKAHEAD] Erro 13: Valor deve ser seguido por Logico ou Fechamento de função/condição"));
                 error_flag = true;
             }
         }
 
         // Token VARIAVEL (7/11)
-        else if(isVar(token_da_vez)){
-            if(proximo != _START && !isOperacao(proximo)){
+        else if(isVariable(token_da_vez)){
+            if(proximo != _START && !isOperation(proximo)){
                 result = 14;
-                Serial.println("[LOOKAHEAD] Erro 14: Variavel deve ser seguida por Operacao ou INICIO");
+                Serial.println(F("[LOOKAHEAD] Erro 14: Variavel deve ser seguida por Operacao ou INICIO"));
                 error_flag = true;
             }
         }
 
         // Token ENDCOND (8/11)
-        else if(isEndCond(token_da_vez)){
-            if(proximo != _START && !isCondicao(proximo) && !isMetodo(proximo) && !isFunction(proximo) && !isEndBlock(proximo) ){
+        else if(isEndCondition(token_da_vez)){
+            if(proximo != _START && !isCondition(proximo) && !isMethod(proximo) && !isFunction(proximo) && !isEndBlock(proximo) ){
                 result = 15;
-                Serial.println("[LOOKAHEAD] Erro 15: Proximo token invalido apos Fechar Condicao");
+                Serial.println(F("[LOOKAHEAD] Erro 15: Proximo token invalido apos Fechar Condicao"));
                 error_flag = true;
             }
         }
 
         // Token ENDBLOCK (9/11)
         else if(isEndBlock(token_da_vez)){
-            if(proximo != _START && !isCondicao(proximo) && !isMetodo(proximo) && !isFunction(proximo) && !isEndBlock(proximo) && proximo != _END){
+            if(proximo != _START && !isCondition(proximo) && !isMethod(proximo) && !isFunction(proximo) && !isEndBlock(proximo) && proximo != _END){
                 result = 16;
-                Serial.println("[LOOKAHEAD] Erro 16: Proximo token invalido apos Fechar Bloco");
+                Serial.println(F("[LOOKAHEAD] Erro 16: Proximo token invalido apos Fechar Bloco"));
                 error_flag = true;
             }
         }
 
         // Token ENDFUNCTION (10/11)
         else if(isEndFunction(token_da_vez)){
-            if(proximo != _START && !isCondicao(proximo) && !isMetodo(proximo) && !isFunction(proximo) && !isEndBlock(proximo) && proximo != _END){
+            if(proximo != _START && !isCondition(proximo) && !isMethod(proximo) && !isFunction(proximo) && !isEndBlock(proximo) && proximo != _END){
                 result = 17;
-                Serial.println("[LOOKAHEAD] Erro 17: Proximo token invalido apos Fechar Funcao");
+                Serial.println(F("[LOOKAHEAD] Erro 17: Proximo token invalido apos Fechar Funcao"));
                 error_flag = true;
             }
         }
 
        // Token LÓGICO (11/11)
         else if(isLogical(token_da_vez)){
-            if(!isValor(proximo) && !isMetodo(proximo) ){
+            if(!isValue(proximo) && !isMethod(proximo) ){
                 result = 18;
-                Serial.println("[LOOKAHEAD] Erro 18: Operador Logico deve ser seguido por Valor ou Metodo");
+                Serial.println(F("[LOOKAHEAD] Erro 18: Operador Logico deve ser seguido por Valor ou Metodo"));
                 error_flag = true;
             }
         }
 
         if(error_flag){
-            Serial.print("[LOOKAHEAD] Atual/Prox: ");
+            Serial.print(F("[LOOKAHEAD] Atual/Prox: "));
             Serial.print(token_da_vez);
-            Serial.print(" / ");
+            Serial.print(F(" / "));
             Serial.println(proximo);
             break;
         }
     }
 
     if(!error_flag){
-        Serial.print("[LOOKAHEAD] Sucesso: ");
+        Serial.print(F("[LOOKAHEAD] Sucesso: "));
         Serial.println(result);
     }
 
+    return error_flag;
+}
+
+bool Syntax::Semantic(){
+    bool error_flag = false;
+    int token_da_vez;
+    int qtd_conditions = 0;
+    int qtd_functions = 0;
+    int missing_endblocks = 0;
+    bool is_in_condition = false;
+    bool is_condition_ended = true;
+    bool is_in_function = false;
+
+    for (int i = 0; i < total; i++) {
+
+        token_da_vez = tokens[i];
+
+        if(isCondition(token_da_vez)){
+            qtd_conditions++;
+            missing_endblocks++;
+
+        }else if(isEndCondition(token_da_vez)){
+            qtd_conditions--;
+        }
+
+        if(isEndBlock(token_da_vez)){
+            missing_endblocks--;
+        }
+
+        if(isFunction(token_da_vez)){
+            qtd_functions++;
+        }else if(isEndFunction(token_da_vez)){
+            qtd_functions--;
+        }
+
+        // Se abertura de condições maior que zero, está em uma condição
+        if(qtd_conditions > 0){
+            is_in_condition = true;
+        }else{
+            is_in_condition = false;  // IMPORTANTE: resetar quando sair da condição
+        }
+
+        // Se abertura de funções maior que zero, está em uma função
+        if(qtd_functions > 0){
+            is_in_function = true;
+        }else{
+            is_in_function = false;  // IMPORTANTE: resetar quando sair da função
+        }
+
+        // Se não falta fechar nenhum bloco, é porque não foi aberto, logo, a condição foi terminada / nem começou
+        if(missing_endblocks == 0){
+            is_condition_ended = true;
+        }
+
+        if(is_in_condition){
+            // Não pode ter método void
+            if(isVoidMethod(token_da_vez)){
+                Serial.println(F("[SEMANTIC] Erro: Não é permitido funções de comando (VOID) em condições"));
+                error_flag = true;  
+            }
+
+            // Não pode ter comparação de varáveis de tipo diferente
+
+            // Não pode lógicos infinitos, seguir estrutura variavel + operador + valor + lógico
+        }else{
+            // Não pode operações de comparação ou lógicas fora de condição
+            if(isOperation(token_da_vez) || isLogical(token_da_vez)){
+                Serial.println(F("[SEMANTIC] Erro: Operacoes fora de condicoes"));
+                error_flag = true;
+            }
+        }
+        
+        // Não pode fechar bloco de condição 
+        if(missing_endblocks < 0){
+            Serial.println(F("[SEMANTIC] Erro: Fechou blocos sem poder"));
+            error_flag = true;
+        } else if(qtd_conditions < 0){
+            Serial.println(F("[SEMANTIC] Erro: Fechou condicoes sem poder"));
+            error_flag = true; 
+        }else if(qtd_functions < 0){
+            Serial.println(F("[SEMANTIC] Erro: Fechou funcoes sem poder"));
+            error_flag = true; 
+        }
+
+        if(is_in_function){
+            // Não pode nada além de valor numérico dentro de função
+            if(!isNumberValue(token_da_vez) && !isFunction(token_da_vez) && !isEndFunction(token_da_vez)){
+                Serial.println(F("[SEMANTIC] Erro: Funcao aceita apenas valores numericos"));
+                error_flag = true; 
+            }
+        }
+
+        // Para o loop se encontrar erro
+        if(error_flag){
+            break;
+        }
+    }
+
+    if(!error_flag){
+        Serial.print(F("[SEMANTIC] Sucesso: "));
+        Serial.println(result);
+    }
+    
     return error_flag;
 }

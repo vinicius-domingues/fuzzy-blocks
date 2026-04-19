@@ -13,6 +13,7 @@ class Syntax {
         Syntax(int dados[], int tamanho);
         bool Parser();
         bool LookAhead();
+        bool Semantic();
         
 };
 

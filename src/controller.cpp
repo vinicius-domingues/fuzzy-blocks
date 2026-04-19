@@ -35,7 +35,7 @@ void Controller::Listener(){
     // 11 - Cascata Relacional: Encadeamento de operadores. No C++, vira `(obstaculo == obstaculo) < obstaculo`, avaliando 1 < distância.
 
     // INICIO, IF, OBSTACULO, AND, CINCO, FECHA_COND, FECHA_BLOCO, INICIO (FIM)
-    // int entry_tokens[] = {_START, _IF, _PROXIMITY, _AND, _FIVE, _ENDCONDITION, _ENDBLOCK, _START};
+    int entry_tokens[] = {_START, _IF, _PROXIMITY, _AND, _FIVE, _ENDCONDITION, _ENDBLOCK, _START};
     // 12 - Curto-Circuito Lógico com Constante: "IF OBSTACULO E 5". O C++ ignora o 5 (pois é sempre verdadeiro), matando a intenção do usuário.
 
 

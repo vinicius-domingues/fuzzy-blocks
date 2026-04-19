@@ -232,13 +232,39 @@ bool Syntax::Semantic(){
     int qtd_conditions = 0;
     int qtd_functions = 0;
     int missing_endblocks = 0;
+    int condition_begin_position = 0;
+    int qtd_elements_in_condition = 0;
     bool is_in_condition = false;
-    bool is_condition_ended = true;
     bool is_in_function = false;
 
     for (int i = 0; i < total; i++) {
-
         token_da_vez = tokens[i];
+
+        // Se abertura de condições maior que zero, está em uma condição
+        if(qtd_conditions > 0){
+            Serial.println(F("Conteúdo da condição: "));
+            Serial.println((token_da_vez));
+
+            condition_begin_position = i;
+            is_in_condition = true;
+        }else{
+            Serial.println(F("Começo/fim da condição: "));
+            Serial.println((token_da_vez));
+            
+            if(condition_begin_position != 0 || qtd_elements_in_condition != 0){
+                condition_begin_position = 0;  // Limpa
+                qtd_elements_in_condition = 0; // Limpa
+            }
+
+            is_in_condition = false; 
+        }
+
+        // Se abertura de funções maior que zero, está em uma função
+        if(qtd_functions > 0){
+            is_in_function = true;
+        }else{
+            is_in_function = false;  
+        }
 
         if(isCondition(token_da_vez)){
             qtd_conditions++;
@@ -258,35 +284,19 @@ bool Syntax::Semantic(){
             qtd_functions--;
         }
 
-        // Se abertura de condições maior que zero, está em uma condição
-        if(qtd_conditions > 0){
-            is_in_condition = true;
-        }else{
-            is_in_condition = false;  // IMPORTANTE: resetar quando sair da condição
-        }
-
-        // Se abertura de funções maior que zero, está em uma função
-        if(qtd_functions > 0){
-            is_in_function = true;
-        }else{
-            is_in_function = false;  // IMPORTANTE: resetar quando sair da função
-        }
-
-        // Se não falta fechar nenhum bloco, é porque não foi aberto, logo, a condição foi terminada / nem começou
-        if(missing_endblocks == 0){
-            is_condition_ended = true;
-        }
-
-        if(is_in_condition){
-            // Não pode ter método void
+        /* Não pode ter método void
             if(isVoidMethod(token_da_vez)){
                 Serial.println(F("[SEMANTIC] Erro: Não é permitido funções de comando (VOID) em condições"));
                 error_flag = true;  
             }
+            */
 
             // Não pode ter comparação de varáveis de tipo diferente
 
             // Não pode lógicos infinitos, seguir estrutura variavel + operador + valor + lógico
+
+        if(is_in_condition){
+            qtd_elements_in_condition++;
         }else{
             // Não pode operações de comparação ou lógicas fora de condição
             if(isOperation(token_da_vez) || isLogical(token_da_vez)){

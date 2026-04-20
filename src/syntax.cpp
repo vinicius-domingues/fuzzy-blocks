@@ -244,8 +244,6 @@ bool Syntax::Semantic(){
         // Se abertura de condições maior que zero, está em uma condição
         if(qtd_conditions > 0){
             if(!isEndCondition(token_da_vez)){
-                Serial.println(F("Conteúdo válido da condição: "));
-                Serial.println((token_da_vez));
                 tokens_in_condition_space[saving_token] = token_da_vez;
                 saving_token++;
             }
@@ -359,11 +357,55 @@ bool Syntax::Semantic(){
 }
 
 bool Syntax::ExpressionValidator(int tokens_in_condition[], int size_tokens_in_condition){
-   int* position_in_array = tokens_in_condition; 
-   int total_qtd = size_tokens_in_condition;
+    int* position_in_array = tokens_in_condition; 
+    int total_qtd = size_tokens_in_condition;
+    int qtd_dividers = 0;
+    int stage = 0; // 0 = variavel/metodo | 1 = operador | 2 = valor
+    int qtd_tokens_per_expression = 0;
+    bool error_flag = false;
 
-   for(int l = 0; l < total_qtd ; l++){
-        Serial.println("[EXPRESSION] No array: ");
-        Serial.println(position_in_array[l]);
-   }
+
+    for(int l = 0; l < total_qtd ; l++){
+        if(!isLogical(position_in_array[l])){
+            qtd_tokens_per_expression++;
+        }
+
+        // Se for fim da expressão (caraceter condicional) ou fim total da condição, valida
+        if(isLogical(position_in_array[l]) || qtd_tokens_per_expression == total_qtd){
+            qtd_dividers++;
+
+            Serial.print(F("[EXPRESSION] DEBUG 1: ")); Serial.println(isLogical(position_in_array[l]));
+            Serial.print(F("[EXPRESSION] DEBUG 2: ")); Serial.println(qtd_tokens_per_expression == total_qtd);
+            Serial.print(F("[EXPRESSION] Token atual: ")); Serial.println(position_in_array[l]);
+            Serial.print(F("[EXPRESSION] Quantia total: ")); Serial.println(total_qtd);
+            Serial.print(F("[EXPRESSION] Quantia atual: ")); Serial.println(qtd_tokens_per_expression);
+
+            if (qtd_tokens_per_expression != 3 && qtd_tokens_per_expression != 1){
+                error_flag = true;    
+
+                if (qtd_tokens_per_expression > 3){
+                    Serial.println(F("[EXPRESSION] Erro: Fração da condição tem valores demais (4+)"));
+                }
+                else if(qtd_tokens_per_expression == 2){
+                    Serial.println(F("[EXPRESSION] Erro: ração da condição tem valores insuficientes (2)"));
+                }
+                
+                break;
+            }
+
+            Serial.print(F("[EXPRESSION] Condição: ")); Serial.println(qtd_dividers);
+            Serial.print(F("[EXPRESSION] Último token: ")); Serial.println(position_in_array[l-1]);
+
+            // Limpeza
+            qtd_tokens_per_expression = 0;
+        }
+
+        
+    }
+
+    if(!error_flag){
+        Serial.print(F("[EXPRESSION] Sucesso: ")); Serial.println(result);
+    }
+    
+    return error_flag;
 }

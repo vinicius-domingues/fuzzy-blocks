@@ -23,24 +23,21 @@ void Controller::Listener(){
 
   // Tratamento de coisas dentro de condições
     // INICIO, IF, SEGUNDOS, MAIOR, OBSTACULO, MENOR, TRUE, FECHA_COND, FECHA_BLOCO, INICIO (FIM)
-    // int entry_tokens[] = {_START, _IF, _SEGUNDOS, _BIGGER, _PROXIMITY, _SMALLER, _TRUE, _ENDCONDITIONITION, _ENDBLOCK, _START};
+    int entry_tokens[] = {_START, _IF, _SEGUNDOS, _BIGGER, _PROXIMITY, _ENDCONDITION, _ENDBLOCK, _START};
     // 3 - Type mismatch (Mistura de tipos incompatíveis)
 
     // INICIO, IF, SEGUNDOS, IGUAL, OBSTACULO, FECHA_COND, FECHA_BLOCO, INICIO (FIM)
     // int entry_tokens[] = {_START, _IF, _SEGUNDOS, _EQUAL, _PROXIMITY, _ENDCONDITION, _ENDBLOCK, _START};
     // 10 - Comparação Inter-Domínios: Comparando uma unidade de tempo (_SEGUNDOS) com um estado/distância (_PROXIMITY).
 
+    // SOLVED!
     // INICIO, IF, OBSTACULO, IGUAL, OBSTACULO, MENOR, OBSTACULO, FECHA_COND, FECHA_BLOCO, INICIO (FIM)
-    // entry_tokens[] = {_START, _IF, _PROXIMITY, _EQUAL, _PROXIMITY, _SMALLER, _PROXIMITY, _ENDCONDITION, _ENDBLOCK, _START};
+    // int entry_tokens[] = {_START, _IF, _PROXIMITY, _EQUAL, _PROXIMITY, _SMALLER, _PROXIMITY, _ENDCONDITION, _ENDBLOCK, _START};
     // 11 - Cascata Relacional: Encadeamento de operadores. No C++, vira `(obstaculo == obstaculo) < obstaculo`, avaliando 1 < distância.
 
     // INICIO, IF, OBSTACULO, AND, CINCO, FECHA_COND, FECHA_BLOCO, INICIO (FIM)
-    int entry_tokens[] = {_START, _IF, _PROXIMITY, _AND, _FIVE, _ENDCONDITION, _ENDBLOCK, _START};
+    // int entry_tokens[] = {_START, _IF, _PROXIMITY, _BIGGER, _FIVE, _AND, _FIVE, _ENDCONDITION, _ENDBLOCK,_START};
     // 12 - Curto-Circuito Lógico com Constante: "IF OBSTACULO E 5". O C++ ignora o 5 (pois é sempre verdadeiro), matando a intenção do usuário.
-
-
-// --- NOVOS ERROS LÓGICOS (Passam por Parser, LookAhead e Semantic) ---
-
 
   int i = 0;
   bool waiting = true;    
@@ -117,7 +114,7 @@ void Controller::Listener(){
   }
 
   Serial.println(""); 
-  Serial.print("[LISTENER] Total de blocos lidos: ");
-  Serial.println(blocks_read);
+  Serial.print(F("[LISTENER] Sucesso: "));
+  Serial.println(0);
 }
 

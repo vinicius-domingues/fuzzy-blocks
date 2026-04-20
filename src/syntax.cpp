@@ -231,9 +231,10 @@ bool Syntax::Semantic(){
     int token_da_vez;
     int qtd_conditions = 0;
     int qtd_functions = 0;
-    int missing_endblocks = 0;
-    int condition_begin_position = 0;
+    int saving_token = 0;
     int qtd_elements_in_condition = 0;
+    int tokens_in_condition_space[] = {-2, -2, -2, -2 , -2, -2, -2, -2, -2, -2, -2 , -2}; // 12
+    int missing_endblocks = 0; 
     bool is_in_condition = false;
     bool is_in_function = false;
 
@@ -242,22 +243,40 @@ bool Syntax::Semantic(){
 
         // Se abertura de condições maior que zero, está em uma condição
         if(qtd_conditions > 0){
-            Serial.println(F("Conteúdo da condição: "));
-            Serial.println((token_da_vez));
-
-            condition_begin_position = i;
-            is_in_condition = true;
-        }else{
-            Serial.println(F("Começo/fim da condição: "));
-            Serial.println((token_da_vez));
-            
-            if(condition_begin_position != 0 || qtd_elements_in_condition != 0){
-                condition_begin_position = 0;  // Limpa
-                qtd_elements_in_condition = 0; // Limpa
+            if(!isEndCondition(token_da_vez)){
+                Serial.println(F("Conteúdo válido da condição: "));
+                Serial.println((token_da_vez));
+                tokens_in_condition_space[saving_token] = token_da_vez;
+                saving_token++;
             }
 
-            is_in_condition = false; 
+            is_in_condition = true;
+        }else{
+            /* Serial.println(F("Começo/fim da condição: ")); Serial.println((token_da_vez));}*/     
+            if(saving_token > 0 || qtd_elements_in_condition != 0){
+                //Limpezas
+
+                // Antes de limpar, joga para analisar lexicamente
+                error_flag = Syntax::ExpressionValidator(tokens_in_condition_space, saving_token);
+                
+                // Se encontrou erro de expressão, já para tudo
+                if(error_flag){
+                    result = 20;
+                    break;
+                }else{ // Concretiza
+                    for(int k = 0 ; k < 12 ; k++) {
+                        tokens_in_condition_space[k] = -2;        
+                    }
+                    
+                    saving_token = 0;
+
+                    qtd_elements_in_condition = 0; 
+                }
+             }         
+             is_in_condition = false;      
         }
+        
+    
 
         // Se abertura de funções maior que zero, está em uma função
         if(qtd_functions > 0){
@@ -337,4 +356,14 @@ bool Syntax::Semantic(){
     }
     
     return error_flag;
+}
+
+bool Syntax::ExpressionValidator(int tokens_in_condition[], int size_tokens_in_condition){
+   int* position_in_array = tokens_in_condition; 
+   int total_qtd = size_tokens_in_condition;
+
+   for(int l = 0; l < total_qtd ; l++){
+        Serial.println("[EXPRESSION] No array: ");
+        Serial.println(position_in_array[l]);
+   }
 }

@@ -31,7 +31,7 @@ void Controller::Listener(){
     // 10 - Comparação Inter-Domínios: Comparando uma unidade de tempo (_SEGUNDOS) com um estado/distância (_PROXIMITY).
 
     // INICIO, IF, OBSTACULO, IGUAL, OBSTACULO, MENOR, OBSTACULO, FECHA_COND, FECHA_BLOCO, INICIO (FIM)
-    // int entry_tokens[] = {_START, _IF, _PROXIMITY, _EQUAL, _PROXIMITY, _SMALLER, _PROXIMITY, _ENDCONDITION, _ENDBLOCK, _START};
+    // entry_tokens[] = {_START, _IF, _PROXIMITY, _EQUAL, _PROXIMITY, _SMALLER, _PROXIMITY, _ENDCONDITION, _ENDBLOCK, _START};
     // 11 - Cascata Relacional: Encadeamento de operadores. No C++, vira `(obstaculo == obstaculo) < obstaculo`, avaliando 1 < distância.
 
     // INICIO, IF, OBSTACULO, AND, CINCO, FECHA_COND, FECHA_BLOCO, INICIO (FIM)

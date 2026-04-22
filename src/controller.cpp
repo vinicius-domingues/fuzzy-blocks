@@ -62,6 +62,8 @@ void Controller::Listener(){
 
   // IFs aninhados (ok)
   int entry_tokens[] = {_START, _IF, _PROXIMITY, _AND, _PROXIMITY, _EQUAL, _TRUE, _OR, _PROXIMITY,_ENDCONDITION, _IF, _PROXIMITY, _EQUAL, _FALSE, _OR, _PROXIMITY, _AND, _PROXIMITY, _EQUAL, _TRUE, _ENDCONDITION, _ENDBLOCK, _ENDBLOCK, _START};
+  
+  
   int i = 0;
   bool waiting = true;    
   bool listening = false; 

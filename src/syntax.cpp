@@ -139,7 +139,7 @@ bool Syntax::LookAhead(){
 
         // Token MÉTODO (4/11)
         else if(isMethod(token_da_vez)){
-            if(isVariable(proximo) || isValue(proximo) || isCondition(proximo)){ 
+            if(isVariable(proximo) || isValue(proximo) /*|| isCondition(proximo)*/){ 
                 result = 11;
                 Serial.println(F("[LOOKAHEAD] Erro 11: Metodo nao pode ser seguido por MÉTODO, VARIÁVEL ou VALOR"));
                 error_flag = true;
@@ -244,8 +244,15 @@ bool Syntax::Semantic(){
         // Se abertura de condições maior que zero, está em uma condição
         if(qtd_conditions > 0){
             if(!isEndCondition(token_da_vez)){
-                tokens_in_condition_space[saving_token] = token_da_vez;
-                saving_token++;
+                // Bloqueia overflow (uma condição pode ter apenas 4 OU ou E)
+                if(saving_token < 12) { 
+                        tokens_in_condition_space[saving_token] = token_da_vez;
+                        saving_token++;
+                } else {
+                        Serial.println(F("[SEMANTIC] Erro: Condição complexa demais (Overflow)"));
+                        error_flag = true;
+                        break;
+                }
             }
 
             is_in_condition = true;
@@ -303,12 +310,19 @@ bool Syntax::Semantic(){
         if(is_in_condition){
             qtd_elements_in_condition++;
         }else{
-            // Não pode operações de comparação ou lógicas fora de condição
-            if(isOperation(token_da_vez) || isLogical(token_da_vez)){
-                Serial.println(F("[SEMANTIC] Erro: Operacoes fora de condicoes"));
+            // Não pode comparar ou usar métodos não nulos fora de condição
+            if(isOperation(token_da_vez)){
+                Serial.println(F("[SEMANTIC] Erro: Operações devem estar dentro de condições"));
                 error_flag = true;
+            }else if(isLogical(token_da_vez)){
+                Serial.println(F("[SEMANTIC] Erro: Lógicos (E/OU) devem estar dentro de condições"));
+                error_flag = true;   
+            }else if(isNonVoidMethod(token_da_vez)){
+                Serial.println(F("[SEMANTIC] Erro: Ações (métodos) não nulos devem estar dentro de condições"));
+                error_flag = true;   
             }
         }
+        
         
         // Não pode fechar bloco de condição 
         if(missing_endblocks < 0){

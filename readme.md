@@ -17,10 +17,12 @@
 
 
 // --------------------------------------------------------------------------------------
-// Fuzzy Interpreter 0.7
+// Fuzzy Interpreter 0.7 <->
 // --------------------------------------------------------------------------------------
 
-1 - Guardando valores para executar
+1 - Proibir métodos não Void fora de condições
+
+2 - Guardando valores para executar
 
 
 

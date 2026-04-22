@@ -22,23 +22,46 @@ void Controller::Listener(){
 // Erros semânticos mapeados (Que passam por Parser e LookAhead)
 
   // Tratamento de coisas dentro de condições
+
+    // SOLVED!
     // INICIO, IF, SEGUNDOS, MAIOR, OBSTACULO, MENOR, TRUE, FECHA_COND, FECHA_BLOCO, INICIO (FIM)
-    int entry_tokens[] = {_START, _IF, _SEGUNDOS, _BIGGER, _PROXIMITY, _ENDCONDITION, _ENDBLOCK, _START};
+    // int entry_tokens[] = {_START, _IF, _SEGUNDOS, _BIGGER, _PROXIMITY, _ENDCONDITION, _ENDBLOCK, _START};
     // 3 - Type mismatch (Mistura de tipos incompatíveis)
 
+    // SOLVED! Erro: Elemento 3 não é um valor
     // INICIO, IF, SEGUNDOS, IGUAL, OBSTACULO, FECHA_COND, FECHA_BLOCO, INICIO (FIM)
     // int entry_tokens[] = {_START, _IF, _SEGUNDOS, _EQUAL, _PROXIMITY, _ENDCONDITION, _ENDBLOCK, _START};
     // 10 - Comparação Inter-Domínios: Comparando uma unidade de tempo (_SEGUNDOS) com um estado/distância (_PROXIMITY).
 
-    // SOLVED!
+    // SOLVED!  Erro: Fração da condição tem valores demais (4+)
     // INICIO, IF, OBSTACULO, IGUAL, OBSTACULO, MENOR, OBSTACULO, FECHA_COND, FECHA_BLOCO, INICIO (FIM)
     // int entry_tokens[] = {_START, _IF, _PROXIMITY, _EQUAL, _PROXIMITY, _SMALLER, _PROXIMITY, _ENDCONDITION, _ENDBLOCK, _START};
     // 11 - Cascata Relacional: Encadeamento de operadores. No C++, vira `(obstaculo == obstaculo) < obstaculo`, avaliando 1 < distância.
 
+    // SOLVED! Erro: Condição única não é MÉTODO do tipo BOOLEANO
     // INICIO, IF, OBSTACULO, AND, CINCO, FECHA_COND, FECHA_BLOCO, INICIO (FIM)
     // int entry_tokens[] = {_START, _IF, _PROXIMITY, _BIGGER, _FIVE, _AND, _FIVE, _ENDCONDITION, _ENDBLOCK,_START};
     // 12 - Curto-Circuito Lógico com Constante: "IF OBSTACULO E 5". O C++ ignora o 5 (pois é sempre verdadeiro), matando a intenção do usuário.
 
+    //   int entry_tokens[] = {_START, _IF, _PROXIMITY, _BIGGER, _FIVE, _AND, _PROXIMITY, _ENDCONDITION, _ENDBLOCK,_START};
+   // int entry_tokens[] = {_START, _IF, _PROXIMITY, _BIGGER, _FIVE, _ENDCONDITION, _ENDBLOCK,_START};
+
+
+
+  // IF MÉTODO AND MÉTODO > 5 AND MÉTODO (ok)
+  // int entry_tokens[] = {_START, _IF, _PROXIMITY, _AND, _PROXIMITY, _BIGGER, _FIVE, _OR, _PROXIMITY,_ENDCONDITION, _ENDBLOCK, _START};
+
+  // IF MÉTODO > 5 AND MÉTODO OR MÉTODO > 5 (ok)
+  // int entry_tokens[] = {_START, _IF, _PROXIMITY, _BIGGER, _FIVE, _OR, _PROXIMITY, _AND, _PROXIMITY, _BIGGER, _FIVE, _ENDCONDITION, _ENDBLOCK, _START};
+
+  // IF METODO (ok)
+  // int entry_tokens[] = {_START, _IF, _PROXIMITY, _ENDCONDITION, _ENDBLOCK, _START};
+
+  // IF METODO > 5 (ok)
+  //int entry_tokens[] = {_START, _IF, _PROXIMITY, _BIGGER, _FIVE, _ENDCONDITION, _ENDBLOCK, _START};
+
+  // IFs aninhados (ok)
+  int entry_tokens[] = {_START, _IF, _PROXIMITY, _AND, _PROXIMITY, _EQUAL, _TRUE, _OR, _PROXIMITY,_ENDCONDITION, _IF, _PROXIMITY, _EQUAL, _FALSE, _OR, _PROXIMITY, _AND, _PROXIMITY, _EQUAL, _TRUE, _ENDCONDITION, _ENDBLOCK, _ENDBLOCK, _START};
   int i = 0;
   bool waiting = true;    
   bool listening = false; 
@@ -61,8 +84,7 @@ void Controller::Listener(){
   }
  
 
-  bool is_condition = false;
-  bool is_function = false;
+
   while(listening){
     token = entry_tokens[i];   // Pulou o início, agora só valores validos (limpa o início)
     
@@ -70,32 +92,11 @@ void Controller::Listener(){
       listening = false;
     }else{
       
-      if(token == _IF || token == _WHILE){
-        is_condition = true;
-      } else if (token == _DELAY){
-        is_function = true;
-      }
+
 
       sequence[blocks_read] = token;
       blocks_read++;
 
-      // Se for fim da linha e não for condição e função ao mesmo tempo (pois indicaria erro de blocos)
-      /* if ( fim da linha || !(is_condition && is_function )){
-          if ( is_condition ) {
-            sequence[blocks_read] = _ENDCONDITIONITION;
-            is_condition = false;
-            blocks_read++;
-            }
-
-            if (is_function){
-            sequence[blocks_read] = _ENDFUNCTION;
-            is_function = false;
-            blocks_read++;
-           }
-        }else{
-          got_error = true;
-        }
-      */
 
       i++;
 

@@ -61,7 +61,10 @@ void Controller::Listener(){
   //int entry_tokens[] = {_START, _IF, _PROXIMITY, _BIGGER, _FIVE, _ENDCONDITION, _ENDBLOCK, _START};
 
   // IFs aninhados (ok)
-  int entry_tokens[] = {_START, _IF, _PROXIMITY, _AND, _PROXIMITY, _EQUAL, _TRUE, _OR, _PROXIMITY,_ENDCONDITION, _IF, _PROXIMITY, _EQUAL, _FALSE, _OR, _PROXIMITY, _AND, _PROXIMITY, _EQUAL, _TRUE, _ENDCONDITION, _ENDBLOCK, _ENDBLOCK, _START};
+  // int entry_tokens[] = {_START, _IF, _PROXIMITY, _AND, _PROXIMITY, _EQUAL, _TRUE, _OR, _PROXIMITY,_ENDCONDITION, _IF, _PROXIMITY, _EQUAL, _FALSE, _OR, _PROXIMITY, _AND, _PROXIMITY, _EQUAL, _TRUE, _ENDCONDITION, _ENDBLOCK, _ENDBLOCK, _START};
+  
+  int entry_tokens[] = {_START, _RED_LED, _DELAY, _FIVE, _ENDFUNCTION, _GREEN_LED, _DELAY, _FIVE, _ENDFUNCTION, _BLUE_LED, _DELAY, _FIVE, _ENDFUNCTION, _START};
+  
   int i = 0;
   bool waiting = true;    
   bool listening = false; 
@@ -89,6 +92,9 @@ void Controller::Listener(){
     token = entry_tokens[i];   // Pulou o início, agora só valores validos (limpa o início)
     
     if(token == _START || token == _END || blocks_read == blocks_limit || got_error){
+      if (token == _START){
+        is_loop = true;
+      }
       listening = false;
     }else{
       

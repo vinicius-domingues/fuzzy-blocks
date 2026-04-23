@@ -15,7 +15,6 @@ class Syntax {
         bool LookAhead();
         bool Semantic();
         bool ExpressionValidator(int dados[], int tamanho);
-        
 };
 
 #endif

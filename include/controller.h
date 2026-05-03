@@ -20,7 +20,9 @@ class Controller{
     void Listener();
     void Mapper();
     void DebugMenu();
+    void Cleaner();
     void writeEEPROM(int address, byte data);
+    void transmitI2C(byte slaveAddress);
 
   private:
     byte readEEPROM(int address);

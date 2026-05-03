@@ -44,6 +44,10 @@ void loop() {
 
             // Inicia o fluxo padrão do interpretador
             arduino->Listener(); // Aguarda o botão do Pino 5 ser pressionado fisicamente
+
+            // Limpeza
+            arduino->Cleaner();
+
             arduino->Mapper();   // Mapeia o hardware
 
             // Validação em 3 camadas
@@ -61,7 +65,7 @@ void loop() {
                 if (executor != nullptr) { delete executor; }
                 
                 executor = new Evaluator(arduino->sequence, arduino->blocks_read, arduino->is_loop, carrinho);
-
+                
                 ready_instant = millis();
                 seconds_running = 0;
                 

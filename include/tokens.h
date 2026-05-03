@@ -68,6 +68,7 @@
     #define PIN_BUTTON 5 
     #define PIN_CLOCK 6
     #define PIN_SET 7
+    #define I2C 8
     #define EEPROM_ADDR_0 0x50 
     #define EEPROM_ADDR_1 0x51
 #endif

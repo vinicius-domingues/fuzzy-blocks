@@ -3,11 +3,13 @@
 
 
 Controller::Controller() {
+    Wire.begin(); 
     pinMode(PIN_SET, OUTPUT);
     pinMode(PIN_CLOCK, OUTPUT);
-
     pinMode(PIN_BUTTON, INPUT_PULLUP);
-    Wire.begin(); 
+    
+    digitalWrite(PIN_SET, LOW);
+    digitalWrite(PIN_CLOCK, LOW);
 }
 
 void Controller::Prepare() {
@@ -18,7 +20,6 @@ void Controller::Prepare() {
     delay(10);
     Serial.println(F("[HARDWARE] Prepare enviado."));
 }
-
 
 void Controller::Clock() {
     digitalWrite(PIN_CLOCK, HIGH);
@@ -65,13 +66,12 @@ byte Controller::readEEPROM(int address) {
   return 0xFF; 
 }
 
-
 void Controller::DebugMenu() {
     bool in_debug = true;
     bool estadoSet = false;
 
     Serial.println(F("\n====================================="));
-    Serial.println(F("🛠️  CONSOLE DE DEBUG - FUZZY BLOCKS"));
+    Serial.println(F("🛠️  CONSOLE DE DEBUG - FUZZY BLOCKS "));
     Serial.println(F("====================================="));
     Serial.println(F("'c' -> Gerar pulso de Clock"));
     Serial.println(F("'r' -> Ler EEPROM (Posição 1)"));
@@ -145,7 +145,9 @@ void Controller::writeEEPROM(int address, byte data) {
     Wire.endTransmission();
 }
 
+void Controller::Cleaner(){
 
+}
 
 void Controller::Mapper() {
     Serial.println(F("\n[MAPPER] Iniciando leitura do barramento (Shift Register)"));
@@ -158,7 +160,7 @@ void Controller::Mapper() {
     int qtd_functions = 0;
 
     // Pilha para registrar a profundidade física (quantidade de clocks) das bifurcações
-    int branch_stack[25]; 
+    int branch_stack[100]; 
     int stack_pointer = 0;
     int physical_clocks = 0; // Conta os shifts mecânicos executados
 
@@ -182,15 +184,6 @@ void Controller::Mapper() {
 
         Serial.print(F("[MAPPER] Lido do hardware ativo: "));
         Serial.println(token_lido);
-/*
-while(1){
-    Serial.print(F("parado aqui"));
-    
-    delay(100000000);
-}
-*/
-
-
 
         // 2 - Avalia se é o fim de um braço de roteamento ou fim geral (255)
         if (token_lido == 255 || token_lido == _END) {

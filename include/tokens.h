@@ -1,7 +1,7 @@
 #ifndef TOKENS_H
     #define TOKENS_H
 
-    #define _END -1
+    #define _END 255
 
     // Fluxo inicial
     #define _START 1  
@@ -24,32 +24,34 @@
     #define _AND 20
     #define _OR 21
 
-    // Método
-    // Void
-    #define _BRAKE 100      // Comando para freiar                  (VOID)
-    #define _ACCELERATE 101 // Comando para acelerar                (VOID)
-    #define _HONK 103       // Comando para buzinar                 (VOID)
-    #define _RED_LED 104    // Comando para acender led vermelho    (VOID)
-    #define _GREEN_LED 105  // Comando para acender led verde       (VOID)
-    #define _BLUE_LED 106   // CComando para acender led azul       (VOID)
+    // Método: Void (Intervalo: 30 a 35)
+    #define _BRAKE 30       // Comando para freiar                  (VOID)
+    #define _ACCELERATE 31  // Comando para acelerar                (VOID)
+    #define _HONK 32        // Comando para buzinar                 (VOID)
+    #define _RED_LED 33     // Comando para acender led vermelho    (VOID)
+    #define _GREEN_LED 34   // Comando para acender led verde       (VOID)
+    #define _BLUE_LED 35    // Comando para acender led azul        (VOID)
 
-    // Não void
-    #define _PROXIMITY 200  // Comando para ler sensor
+    // Método: Não void (Intervalo isolado)
+    #define _PROXIMITY 40   // Comando para ler sensor
 
     // Função
-    #define _DELAY 300
+    #define _DELAY 50
 
-    // Valor
-    #define _ZERO 400
-    #define _ONE 401
-    #define _FIVE 402
-    #define _FIFTY 403
-    #define _THOUSAND 404
-    #define _TRUE 500
-    #define _FALSE 501
+    // Valor (ATENÇÃO: Numéricos vêm antes dos Booleanos para a regra isValue abranger todos)
+    // Intervalo Numérico: 60 a 64
+    #define _ZERO 60
+    #define _ONE 61
+    #define _FIVE 62
+    #define _FIFTY 63
+    #define _THOUSAND 64
+    
+    // Intervalo Booleano: 70 a 71
+    #define _TRUE 70
+    #define _FALSE 71
 
-    // Varáveis
-    #define _SEGUNDOS 600
+    // Variáveis
+    #define _SEGUNDOS 80
 
     // Etapas
     #define _LISTENING 0

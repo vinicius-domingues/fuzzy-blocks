@@ -1,22 +1,127 @@
 #include "Controller.h"
 #include <tokens.h>
 #include <evaluator.h>
+#include <car_actuator.h>
 
-
-Evaluator::Evaluator(int dados[], int tamanho, bool is_loop){
+Evaluator::Evaluator(int dados[], int tamanho, bool is_loop, Car* car){
    sequencia = dados;
    qtd_tokens = tamanho;
    pc = 0;
    this->is_loop = is_loop;
+   this->carrinho = car; 
 }
 
 void Evaluator::Eval(unsigned long segundos){
+    Serial.println(" li ---------------------------------------------------------------------------------------------------------------------------- ");
     int token = sequencia[pc];
+    bool error_flag = false;
 
+    static int function_args[] = {-2, -2, -2, -2};
+    static int function_code = -2;
+    static int function_pointer = 0;
+    static int function_value = -2;
+    static bool is_in_function = false;
+    //static bool is_in_condition = false;
+
+    Serial.println(" ");
     Serial.print("[EVAL] Token: "); Serial.println(token);
     Serial.print("[EVAL] Segundos: "); Serial.println(segundos);
 
-    // Se o ponteiro estiver no último item lido e ainda não bateu em nenhum _END, é porque é LOOP, então volta para o começo
+    // Validador de funções --------------------------------------------------------------------------------------------------------
+    // Valida o começo da função, pegando qual função é e ativando a flag 'is_in_function'
+    Serial.println(" fi ------------------------------------------");
+    if(isFunction(token)){
+        Serial.println("[EVAL] viu que é função");
+        is_in_function = true;
+        function_code = token;
+
+    // Se estiver em função, começa a armazenar os argumentos (máx 4) e valida se há estouro de argumentos (stack overflow)
+    }else if(isEndFunction(token)){
+        Serial.println("[EVAL] viu que função acabou");
+        is_in_function = false;
+
+        Serial.print("[EVAL] função acabou e a função ativa é a: "); Serial.println(function_code);
+
+        // Executor de funções (Valida tipos + Executa)
+        if(function_code == _DELAY){
+            Serial.print("[EVAL] function_code == _DELAY");
+            // Valida tipos
+            if(isNumberValue(function_args[0])){
+                if(function_args[0] == _ZERO){
+                    function_value = 0;
+                }else if(function_args[0] == _ONE){
+                    function_value = 1;
+                }
+                else if(function_args[0] == _FIVE){
+                    function_value = 5;
+                }
+                else if(function_args[0] == _FIFTY){
+                    function_value = 50;
+                }
+                else if(function_args[0] == _THOUSAND){
+                    function_value = 1000;
+                }
+            }else{
+                Serial.print("[EVAL] Erro, valor não é numérico");
+                error_flag = true;
+            }
+
+            // Execução
+            if(!error_flag){
+                // delay espera ms, então multiplicamos por 1000
+                function_value *= 1000;
+                Serial.print("[EVAL] Parando por (ms): "); Serial.println(function_value);
+                delay(function_value);
+            }
+
+        }
+
+        Serial.print("[EVAL] limpeza");
+        // Limpeza para seguir o código
+        function_value = -2;
+        function_code = -2;
+        for(int i = 0; i < function_pointer ; i++){
+            function_args[i] = -2;
+        }
+        function_pointer = 0;
+    }else if (is_in_function){
+        Serial.println("[EVAL] viu que tá dentro da função, armazenou");
+        function_args[function_pointer] = token;
+
+        // Valida estouro de argumentos
+        if(function_pointer + 1 == 5){
+            Serial.print("[EVAL] Erro, estouro de argumentos (maior que 4)");
+            error_flag = true;
+        }else{
+            function_pointer++;
+        }
+        
+    // Ao final da função, tira da flag de 'is_in_function' e começa a executar pois já armazenou todos os argumentos
+    }
+    Serial.println(" ff ------------------------------------------");
+
+    // Executores de métodos void
+    if(token == _BRAKE){
+        
+        this->carrinho->Brake();
+    }else if(token == _ACCELERATE){
+        
+        this->carrinho->Accelerate();
+    }else if(token == _HONK){
+        
+        this->carrinho->Honk();
+    }else if(token == _RED_LED){
+        
+        this->carrinho->RedLed();
+    }else if(token == _BLUE_LED){
+        
+        this->carrinho->BlueLed();
+    }else if(token == _GREEN_LED){
+        
+        this->carrinho->GreenLed();   
+    }
+
+    // Coordenador: Se o ponteiro estiver no último item lido e ainda não bateu em nenhum _END, é porque é LOOP, então volta para o começo
     if(pc == (qtd_tokens - 1)){
         if(this->is_loop){
             pc = 0;
@@ -27,4 +132,17 @@ void Evaluator::Eval(unsigned long segundos){
     }else{
         pc++;
     }
+
+    // Apenas checa o for de argumentos
+    for(int i = 0; i < 4 ; i++){
+        Serial.print("[EVAL] contador: "); Serial.println(i);
+        Serial.print("[EVAL] valor: "); Serial.println(function_args[i]);
+    }
+
+    // O erro aqui apenas faz parar de rodar
+    if(error_flag){
+        this->run = false;
+    }
+    Serial.println(" lf ---------------------------------------------------------------------------------------------------------------------------- ");
 }
+

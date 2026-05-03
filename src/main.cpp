@@ -38,7 +38,7 @@ void setup() {
       carrinho = new Car();
       
       Serial.println("[MAIN] Preparando executor");
-      executor = new Evaluator(arduino->sequence, arduino->blocks_read, arduino->is_loop);
+      executor = new Evaluator(arduino->sequence, arduino->blocks_read, arduino->is_loop, carrinho);
 
       ready_instant = millis();
     }else{

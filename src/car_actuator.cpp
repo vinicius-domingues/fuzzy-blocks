@@ -15,47 +15,47 @@ Car::Car(){
     digitalWrite(PIN_BLUE_LED, LOW);    
 }
 
-void Brake() {
+void Car::Brake() {
     Serial.println(F("[CARRO] Acao executada: Frear"));
     digitalWrite(PIN_MOTOR_A, LOW);
     digitalWrite(PIN_MOTOR_B, LOW);
 }
 
-void Accelerate() {
+void Car::Accelerate() {
     Serial.println(F("[CARRO] Acao executada: Acelerar"));
     digitalWrite(PIN_MOTOR_A, HIGH);
     digitalWrite(PIN_MOTOR_B, LOW);
 }
 
-void Honk() {
+void Car::Honk() {
     Serial.println(F("[CARRO] Acao executada: Buzinar"));
     digitalWrite(PIN_BUZZER, HIGH);
     delay(200); 
     digitalWrite(PIN_BUZZER, LOW);
 }
 
-void RedLed() {
+void Car::RedLed() {
     Serial.println(F("[CARRO] Acao executada: Acender LED Vermelho"));
     digitalWrite(PIN_GREEN_LED, LOW);
     digitalWrite(PIN_BLUE_LED, LOW);
     digitalWrite(PIN_RED_LED, HIGH);
 }
 
-void GreenLed() {
+void Car::GreenLed() {
     Serial.println(F("[CARRO] Acao executada: Acender LED Verde"));
     digitalWrite(PIN_RED_LED, LOW);
     digitalWrite(PIN_BLUE_LED, LOW);
     digitalWrite(PIN_GREEN_LED, HIGH);
 }
 
-void BlueLed() {
+void Car::BlueLed() {
     Serial.println(F("[CARRO] Acao executada: Acender LED Azul"));
     digitalWrite(PIN_RED_LED, LOW);
     digitalWrite(PIN_GREEN_LED, LOW);
     digitalWrite(PIN_BLUE_LED, HIGH);
 }
 
-bool Proximity() {
+bool Car::Proximity() {
     Serial.println(F("[CARRO] Leitura de Sensor: Proximidade"));
     return(HIGH == digitalRead(PIN_SENSOR));
 }

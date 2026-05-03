@@ -2,6 +2,9 @@
 #define CONTROLLER_H
 
 #include <Arduino.h>
+#include <Wire.h>
+
+
 
 class Controller{
   public:
@@ -11,7 +14,16 @@ class Controller{
     bool got_error = false;
     bool is_loop = false;
 
+    Controller();
+    void Clock();
+    void Prepare();
     void Listener();
+    void Mapper();
+    void DebugMenu();
+    void writeEEPROM(int address, byte data);
+
+  private:
+    byte readEEPROM(int address);
 };
 
 #endif

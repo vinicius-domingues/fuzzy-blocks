@@ -53,17 +53,23 @@
     // Variáveis
     #define _SEGUNDOS 80
 
-    // Etapas
+    // Estados
     #define _LISTENING 0
     #define _MAPPING 1
     #define _INTERPRETING 2
     #define _RUNNING 3
-    #define _FINISHING 4
 
     // Tipos
     #define _BOOLEAN -100
     #define _NUMERIC -200
     #define _VOID -300    
+
+    // Hardware
+    #define PIN_BUTTON 5 
+    #define PIN_CLOCK 6
+    #define PIN_SET 7
+    #define EEPROM_ADDR_0 0x50 
+    #define EEPROM_ADDR_1 0x51
 #endif
 
 // 1 - Ações e Sensores (Separados para corrigir erros semânticos)
